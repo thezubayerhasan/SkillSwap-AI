@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { skillService } from '../services/skillService';
 import { useAuth } from '../hooks/useAuth';
 import SkillForm from '../components/features/skills/SkillForm';
@@ -32,7 +32,8 @@ const SkillDiscovery = () => {
   const [category, setCategory] = useState('');
   const [level, setLevel] = useState('');
 
-  const fetchSkills = async () => {
+
+  const fetchSkills = useCallback(async () => {
     setLoading(true);
     try {
       const params: Record<string, string> = {};
@@ -47,11 +48,11 @@ const SkillDiscovery = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, category, level]);
 
   useEffect(() => {
     fetchSkills();
-  }, [category, level]);
+  }, [fetchSkills]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
