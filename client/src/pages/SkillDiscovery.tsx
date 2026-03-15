@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 import { useEffect, useState, useCallback } from 'react';
 import { skillService } from '../services/skillService';
 import { useAuth } from '../hooks/useAuth';
 import SkillForm from '../components/features/skills/SkillForm';
 import MySkills from '../components/features/skills/MySkills';
+=======
+import React, { useEffect, useState } from "react";
+import { skillService } from "SkillSwapAI/client/src/services/skillService";
+import SkillCard from "SkillSwapAI/client/src/components/features/skills/SkillCard";
+import SkillDetailModal from "SkillSwapAI/client/src/components/features/skills/SkillDetailModal";
+>>>>>>> 895a522 (feat(F7): complete skill discovery with cards, search, filters, and detail modal)
 
 interface Skill {
   _id: string;
@@ -11,6 +18,7 @@ interface Skill {
   category?: string;
   level: string;
   tags: string[];
+<<<<<<< HEAD
   isActive: boolean;
   user?: {
     _id: string;
@@ -236,6 +244,39 @@ const SkillDiscovery = () => {
           ))}
         </div>
       )}
+=======
+  user: { _id: string; name: string };
+}
+
+const SkillDiscovery = () => {
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+
+  useEffect(() => {
+    skillService.getAll().then((res) => {
+      setSkills(res.data.skills);
+    });
+  }, []);
+
+  return (
+    <div style={{ padding: 40 }}>
+      <h1>Skill Discovery</h1>
+
+      <div style={{ display: "grid", gap: 16 }}>
+        {skills.map((skill) => (
+          <SkillCard
+            key={skill._id}
+            skill={skill}
+            onViewDetail={setSelectedSkillId}
+          />
+        ))}
+      </div>
+
+      <SkillDetailModal
+        skillId={selectedSkillId}
+        onClose={() => setSelectedSkillId(null)}
+      />
+>>>>>>> 895a522 (feat(F7): complete skill discovery with cards, search, filters, and detail modal)
     </div>
   );
 };
