@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/generateToken.js';
 import jwt from 'jsonwebtoken';
+import { sendVerificationEmail } from '../middleware/Email.js';
 
 // ─── Helper: send refresh token as httpOnly cookie ────────────────────────────
 // httpOnly = JS cannot read it (XSS-safe)
@@ -28,8 +29,11 @@ export const register = async (req, res, next) => {
             throw new Error('An account with this email already exists');
         }
 
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit OTP
+
         // Create user (password hashed by User model pre-save hook)
-        const user = await User.create({ name, email, password, university });
+        const user = await User.create({ name, email, password, university, verificationOTP: otp });
 
         // Generate tokens
         const accessToken = generateAccessToken(user._id);
@@ -39,9 +43,9 @@ export const register = async (req, res, next) => {
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
 
+        await sendVerificationEmail(user.email, otp);
         // Send refresh token in cookie, access token in response body
         sendRefreshTokenCookie(res, refreshToken);
-
         res.status(201).json({
             success: true,
             accessToken,
@@ -71,11 +75,18 @@ export const login = async (req, res, next) => {
             throw new Error('Please provide email and password');
         }
 
+
         // Find user and explicitly include password (it's excluded by default)
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
             res.status(401);
             throw new Error('Invalid email or password');
+        }
+
+        // Only allow login if user is verified
+        if (!user.isVerified) {
+            res.status(401);
+            throw new Error('Account not verified. Please check your email for the OTP.');
         }
 
         // Compare entered password with hashed password
@@ -108,6 +119,7 @@ export const login = async (req, res, next) => {
             },
         });
     } catch (error) {
+        console.error('Login error:', error);
         next(error);
     }
 };
@@ -203,3 +215,28 @@ export const getMe = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const verifyEmail = async (req, res, next) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            res.status(400);
+            throw new Error('Email and OTP required');
+        }
+        const user = await User.findOne({ email }).select('+verificationOTP');
+        console.log('[OTP DEBUG] Provided:', otp, '| DB:', user?.verificationOTP);
+        if (!user || user.verificationOTP !== otp) {
+            res.status(400);
+            throw new Error('Invalid OTP');
+        }
+        user.isVerified = true;
+        user.verificationOTP = undefined;
+        await user.save();
+        res.status(200).json({ success: true, message: 'Email verified successfully' });
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500);
+        throw new Error('Server error during email verification');
+    }
+}

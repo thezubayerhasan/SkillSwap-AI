@@ -20,4 +20,5 @@ export const authService = {
   refreshToken: () => axios.post('/api/auth/refresh-token', {}, { withCredentials: true }),
   getMe: (token: string) =>
     api.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+  verifyOtp: (email: string, otp: string) => api.post('/auth/verify-otp', { email, otp }),
 };
