@@ -14,7 +14,6 @@ import Wallet from './pages/Wallet';
 import Chat from './pages/Chat';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
-import Verify from './pages/Verify';
 
 function App() {
   return (
@@ -26,7 +25,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/verify" element={<Verify />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile/:id?" element={<Profile />} />
             <Route path="/skills" element={<SkillDiscovery />} />
