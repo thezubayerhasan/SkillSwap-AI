@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     trustScore: { type: Number, default: 50 },
     refreshToken: { type: String, select: false },
     isVerified: { type: Boolean, default: false },
+    verificationOTP: { type: String, select: false },
   },
   { timestamps: true }
 );
