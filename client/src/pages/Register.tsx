@@ -1,112 +1,125 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FiUserPlus } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 
 const Register = () => {
-    const navigate = useNavigate();
-    const { register } = useAuth();
+  const navigate = useNavigate();
+  const { register } = useAuth();
 
-    const [form, setForm] = useState({
-        name: '',
-        email: '',
-        password: '',
-        university: '',
-    });
-    const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    university: '',
+  });
+  const [loading, setLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            await register(form.name, form.email, form.password, form.university);
-            toast.success('Account created! Please sign in.');
-            navigate('/login');
-        } catch (err: unknown) {
-            const message =
-                err instanceof Error ? err.message : 'Registration failed. Please try again.';
-            toast.error(message);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const email = await register(form.name, form.email, form.password, form.university);
+      toast.success('Account created! Please verify OTP.');
+      navigate('/verify', { state: { email } });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div style={{ maxWidth: 400, margin: '80px auto', padding: '0 16px' }}>
-            <h1>Create Account</h1>
-            <p>Join SkillSwap AI and start exchanging skills</p>
-
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: 16 }}>
-                    <label>Full Name</label><br />
-                    <input
-                        type="text"
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="John Doe"
-                        style={{ width: '100%', padding: 8, marginTop: 4 }}
-                    />
-                </div>
-
-                <div style={{ marginBottom: 16 }}>
-                    <label>Email</label><br />
-                    <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="you@example.com"
-                        style={{ width: '100%', padding: 8, marginTop: 4 }}
-                    />
-                </div>
-
-                <div style={{ marginBottom: 16 }}>
-                    <label>Password</label><br />
-                    <input
-                        type="password"
-                        name="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        required
-                        minLength={6}
-                        placeholder="At least 6 characters"
-                        style={{ width: '100%', padding: 8, marginTop: 4 }}
-                    />
-                </div>
-
-                <div style={{ marginBottom: 16 }}>
-                    <label>University (optional)</label><br />
-                    <input
-                        type="text"
-                        name="university"
-                        value={form.university}
-                        onChange={handleChange}
-                        placeholder="Your university"
-                        style={{ width: '100%', padding: 8, marginTop: 4 }}
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{ width: '100%', padding: 10, cursor: 'pointer' }}
-                >
-                    {loading ? 'Creating account...' : 'Create Account'}
-                </button>
-            </form>
-
-            <p style={{ marginTop: 16 }}>
-                Already have an account? <Link to="/login">Sign In</Link>
-            </p>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 px-4 py-16">
+      <div className="relative w-full max-w-md rounded-3xl bg-white/10 p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.75)] ring-1 ring-white/10 backdrop-blur">
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-semibold text-white">Create an account</h1>
+            <p className="mt-2 text-sm text-white/70">Join SkillSwap AI and start exchanging skills.</p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+            <FiUserPlus className="h-6 w-6" />
+          </div>
         </div>
-    );
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <label className="block">
+            <span className="text-sm font-medium text-white/80">Full name</span>
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              placeholder="John Doe"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-white/80">Email</span>
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              placeholder="you@example.com"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-white/80">Password</span>
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              minLength={6}
+              placeholder="At least 6 characters"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-white/80">University (optional)</span>
+            <input
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              type="text"
+              name="university"
+              value={form.university}
+              onChange={handleChange}
+              placeholder="Your university"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Creating account ...' : 'Create account'}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-white/60">
+          Already have an account?{' '}
+          <Link className="font-semibold text-white hover:text-indigo-200" to="/login">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default Register;

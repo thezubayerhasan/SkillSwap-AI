@@ -16,6 +16,7 @@ interface RegisterPayload {
 export const authService = {
   login: (data: LoginPayload) => api.post('/auth/login', data),
   register: (data: RegisterPayload) => api.post('/auth/register', data),
+  verifyEmail: (data: { email: string; otp: string }) => api.post('/auth/verify-email', data),
   logout: () => api.post('/auth/logout'),
   refreshToken: () => axios.post('/api/auth/refresh-token', {}, { withCredentials: true }),
   getMe: (token: string) =>

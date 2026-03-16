@@ -56,8 +56,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (name: string, email: string, password: string, university?: string) => {
     const res = await authService.register({ name, email, password, university });
-    setAccessToken(res.data.accessToken);
-    setUser(res.data.user);
+    // Do NOT set user or token yet; wait for OTP verification
+    return res.data.user.email;
   };
 
   const logout = async () => {
