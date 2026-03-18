@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 import errorHandler from './src/middleware/errorHandler.js';
 import authRoutes from './src/routes/authRoutes.js';
+import skillWantedRoutes from './src/routes/skillWantedRoutes.js';
 
 // Load env vars
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use('/api/skills-wanted', skillWantedRoutes);
 
 // API Routes
 import profileRoutes from './src/routes/profileRoutes.js';
