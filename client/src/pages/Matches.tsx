@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MatchCard from "../components/features/matching/MatchCard";
+import { useAuth } from "../hooks/useAuth";
 import { matchService } from "../services/matchService";
 
 interface Match {
@@ -22,14 +24,21 @@ const Matches = () => {
   const navigate = useNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterType>("all");
 
   useEffect(() => {
+    if (!user) {
+      setMatches([]);
+      setLoading(false);
+      return;
+    }
+
     matchService
       .getMatches()
       .then((res) => setMatches(res.data.matches ?? []))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   const handleRequestExchange = (userId: string) => {
     // Navigate to exchange page with partner pre-selected
