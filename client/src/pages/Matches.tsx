@@ -1,22 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { matchService } from '../services/matchService';
-import { useAuth } from '../hooks/useAuth';
-import MatchCard from '../components/features/matching/MatchCard';
-import toast from 'react-hot-toast';
-
-interface MatchUser {
-  _id: string;
-  name: string;
-  university?: string;
-  avatarUrl?: string;
-  trustScore?: number;
-}
+import { useEffect, useState } from "react";
+import MatchCard from "../components/features/matching/MatchCard";
+import { matchService } from "../services/matchService";
 
 interface Match {
-  user: MatchUser;
+  user: {
+    _id: string;
+    name: string;
+    university?: string;
+  };
   theyHaveWhatIWant: boolean;
   iHaveWhatTheyWant: boolean;
+  matchScore?: number;
+  matchedSkills?: string[];
+  matchedNeeds?: string[];
 }
 
 type FilterType = 'all' | 'mutual' | 'they-have' | 'i-have';
@@ -26,15 +22,14 @@ const Matches = () => {
   const navigate = useNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>('all');
 
   useEffect(() => {
-    if (!user) return;
-    matchService.getMatches()
-      .then(res => setMatches(res.data.matches ?? []))
-      .catch(() => toast.error('Failed to load matches'))
+    matchService
+      .getMatches()
+      .then((res) => setMatches(res.data.matches ?? []))
+      .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user]);
+  }, []);
 
   const handleRequestExchange = (userId: string) => {
     // Navigate to exchange page with partner pre-selected
@@ -120,5 +115,3 @@ const Matches = () => {
 };
 
 export default Matches;
-
-
