@@ -1,5 +1,10 @@
 {
+ feature/skill-need-management-F5
   "dependencies": {
     "react-hot-toast": "^2.6.0"
+
+  "devDependencies": {
+    "@types/react": "^19.2.14"
+ main
   }
 }

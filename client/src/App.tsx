@@ -14,7 +14,11 @@ import Wallet from './pages/Wallet';
 import Chat from './pages/Chat';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
+ feature/skill-need-management-F5
 import SkillNeeds from './pages/SkillNeeds';
+
+import OtpConfirm from './pages/OtpConfirm';
+ main
 
 function App() {
   return (
@@ -26,6 +30,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/otp-confirm" element={<OtpConfirm />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile/:id?" element={<Profile />} />
             <Route path="/skills" element={<SkillDiscovery />} />

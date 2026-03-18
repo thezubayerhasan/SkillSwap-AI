@@ -24,8 +24,8 @@ const Register = () => {
         setLoading(true);
         try {
             await register(form.name, form.email, form.password, form.university);
-            toast.success('Account created! Please sign in.');
-            navigate('/login');
+            toast.success('Account created! Please confirm OTP.');
+            navigate('/otp-confirm', { state: { email: form.email } });
         } catch (err: unknown) {
             const message =
                 err instanceof Error ? err.message : 'Registration failed. Please try again.';

@@ -1,42 +1,76 @@
 import Skill from '../models/Skill.js';
 import SkillWanted from '../models/SkillWanted.js';
+import User from '../models/User.js';
 
-/**
- * Find users whose offered skills match the requesting user's wanted skills,
- * and whose wanted skills match the requesting user's offered skills.
- */
 export const computeMatches = async (userId) => {
   const mySkills = await Skill.find({ user: userId, isActive: true });
   const myWanted = await SkillWanted.find({ user: userId });
 
+  if (mySkills.length === 0 && myWanted.length === 0) {
+    return [];
+  }
+
   const mySkillTitles = mySkills.map(s => s.title.toLowerCase());
   const myWantedTitles = myWanted.map(w => w.title.toLowerCase());
 
-  // Find all other users with skills
-  const allSkills = await Skill.find({ user: { $ne: userId }, isActive: true }).populate('user', 'name avatarUrl trustScore');
+  // Fetch all other users' data
+  const otherUsers = await User.find({ _id: { $ne: userId } })
+    .select('name university avatarUrl trustScore');
 
-  const matchMap = new Map();
-  for (const skill of allSkills) {
-    const userId = skill.user._id.toString();
-    if (!matchMap.has(userId)) {
-      matchMap.set(userId, { user: skill.user, matchScore: 0, theirSkills: [] });
+  const results = [];
+
+  for (const candidate of otherUsers) {
+    const theirSkills = await Skill.find({ user: candidate._id, isActive: true });
+    const theirWanted = await SkillWanted.find({ user: candidate._id });
+
+    let matchScore = 0;
+    const matchedSkills = [];
+    const matchedNeeds = [];
+
+    // Checking: they have skills I want
+    const theyHaveWhatIWant = theirSkills.some(s => {
+      const isMatch = myWantedTitles.includes(s.title.toLowerCase());
+      if (isMatch) {
+        matchScore += 50;
+        matchedSkills.push(s.title);
+        // Level bonus
+        if (s.level === 'intermediate' || s.level === 'advanced') matchScore += 5;
+      }
+      return isMatch;
+    });
+
+    // Checking: I have skills they want
+    const iHaveWhatTheyWant = theirWanted.some(w => {
+      const isMatch = mySkillTitles.includes(w.title.toLowerCase());
+      if (isMatch) {
+        matchScore += 50;
+        matchedNeeds.push(w.title);
+      }
+      return isMatch;
+    });
+
+    if (matchScore === 0) continue;
+
+    // Mutual match bonus
+    if (theyHaveWhatIWant && iHaveWhatTheyWant) {
+      matchScore += 10;
     }
-    const entry = matchMap.get(userId);
-    entry.theirSkills.push(skill.title.toLowerCase());
-    if (myWantedTitles.includes(skill.title.toLowerCase())) {
-      entry.matchScore += 50;
+
+    // Trust score bonus (0–10 points)
+    if (candidate.trustScore) {
+      matchScore += Math.round(candidate.trustScore / 10);
     }
+
+    results.push({
+      user: candidate,
+      matchScore,
+      theyHaveWhatIWant,
+      iHaveWhatTheyWant,
+      matchedSkills,
+      matchedNeeds,
+    });
   }
 
-  const allWanted = await SkillWanted.find({ user: { $ne: userId } });
-  for (const wanted of allWanted) {
-    const uid = wanted.user.toString();
-    if (matchMap.has(uid) && mySkillTitles.includes(wanted.title.toLowerCase())) {
-      matchMap.get(uid).matchScore += 50;
-    }
-  }
-
-  return [...matchMap.values()]
-    .filter(m => m.matchScore > 0)
-    .sort((a, b) => b.matchScore - a.matchScore);
+  // Sort by score descending
+  return results.sort((a, b) => b.matchScore - a.matchScore);
 };
