@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { skillService } from "SkillSwapAI/client/src/services/skillService";
+import { useEffect, useState } from "react";
+import { skillService } from '../../../services/skillService';
 
 interface SkillDetail {
   _id: string;
