@@ -1,30 +1,17 @@
- feature/skill-offer-management-F4
-import { useState, useEffect } from 'react';
-
 import { useEffect, useState } from 'react';
- main
-import { skillService } from '../../../services/skillService';
+import { skillWantedService } from '../../../services/skillWantedService';
 import toast from 'react-hot-toast';
 
-interface SkillFormData {
-  title: string;
-  description: string;
-  category: string;
-  level: string;
-  tags: string;
-}
-
-interface Skill {
+interface SkillWanted {
   _id: string;
   title: string;
   description?: string;
   category?: string;
-  level: string;
-  tags: string[];
+  urgency: string;
 }
 
-interface SkillFormProps {
-  editingSkill: Skill | null;
+interface SkillWantedFormProps {
+  editingItem: SkillWanted | null;
   onDone: () => void;
 }
 
@@ -40,38 +27,33 @@ const CATEGORIES = [
   'Other',
 ];
 
-const LEVELS = ['beginner', 'intermediate', 'advanced'];
-
-const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
-  const [form, setForm] = useState<SkillFormData>({
+const SkillWantedForm = ({ editingItem, onDone }: SkillWantedFormProps) => {
+  const [form, setForm] = useState({
     title: '',
     description: '',
     category: '',
-    level: 'intermediate',
-    tags: '',
+    urgency: 'medium',
   });
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (editingSkill) {
+    if (editingItem) {
       setForm({
-        title: editingSkill.title,
-        description: editingSkill.description ?? '',
-        category: editingSkill.category ?? '',
-        level: editingSkill.level,
-        tags: editingSkill.tags.join(', '),
+        title: editingItem.title,
+        description: editingItem.description ?? '',
+        category: editingItem.category ?? '',
+        urgency: editingItem.urgency,
       });
     } else {
       setForm({
         title: '',
         description: '',
         category: '',
-        level: 'intermediate',
-        tags: '',
+        urgency: 'medium',
       });
     }
-  }, [editingSkill]);
+  }, [editingItem]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -94,24 +76,20 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,
-        level: form.level,
-        tags: form.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
+        urgency: form.urgency,
       };
 
-      if (editingSkill) {
-        await skillService.update(editingSkill._id, payload);
-        toast.success('Skill updated!');
+      if (editingItem) {
+        await skillWantedService.update(editingItem._id, payload);
+        toast.success('Updated!');
       } else {
-        await skillService.create(payload);
-        toast.success('Skill created!');
+        await skillWantedService.create(payload);
+        toast.success('Skill need added!');
       }
 
       onDone();
     } catch {
-      toast.error(editingSkill ? 'Failed to update skill' : 'Failed to create skill');
+      toast.error('Failed to save');
     } finally {
       setLoading(false);
     }
@@ -122,7 +100,7 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
       onSubmit={handleSubmit}
       style={{ padding: 16, border: '1px solid #ddd', borderRadius: 8, marginBottom: 24 }}
     >
-      <h2>{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h2>
+      <h2>{editingItem ? 'Edit Skill Need' : 'Add Skill You Need'}</h2>
 
       <div style={{ marginBottom: 12 }}>
         <label>Title *</label>
@@ -132,7 +110,7 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
           value={form.title}
           onChange={handleChange}
           required
-          placeholder="e.g. Python Programming"
+          placeholder="e.g. Graphic Design"
           style={{ width: '100%', padding: 8, marginTop: 4 }}
         />
       </div>
@@ -144,7 +122,7 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
           name="description"
           value={form.description}
           onChange={handleChange}
-          placeholder="Describe what you can teach..."
+          placeholder="Describe what you need help with..."
           rows={3}
           style={{ width: '100%', padding: 8, marginTop: 4 }}
         />
@@ -170,33 +148,19 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
         </div>
 
         <div style={{ flex: 1 }}>
-          <label>Level</label>
+          <label>Urgency</label>
           <br />
           <select
-            name="level"
-            value={form.level}
+            name="urgency"
+            value={form.urgency}
             onChange={handleChange}
             style={{ width: '100%', padding: 8, marginTop: 4 }}
           >
-            {LEVELS.map((l) => (
-              <option key={l} value={l}>
-                {l.charAt(0).toUpperCase() + l.slice(1)}
-              </option>
-            ))}
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
           </select>
         </div>
-      </div>
-
-      <div style={{ marginBottom: 12 }}>
-        <label>Tags (comma-separated)</label>
-        <br />
-        <input
-          name="tags"
-          value={form.tags}
-          onChange={handleChange}
-          placeholder="react, javascript, web"
-          style={{ width: '100%', padding: 8, marginTop: 4 }}
-        />
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>
@@ -205,10 +169,10 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
           disabled={loading}
           style={{ padding: '8px 20px', cursor: 'pointer' }}
         >
-          {loading ? 'Saving...' : editingSkill ? 'Update Skill' : 'Create Skill'}
+          {loading ? 'Saving...' : editingItem ? 'Update' : 'Add Need'}
         </button>
 
-        {editingSkill && (
+        {editingItem && (
           <button
             type="button"
             onClick={onDone}
@@ -222,4 +186,4 @@ const SkillForm = ({ editingSkill, onDone }: SkillFormProps) => {
   );
 };
 
-export default SkillForm;
+export default SkillWantedForm;

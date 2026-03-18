@@ -14,7 +14,11 @@ import Wallet from './pages/Wallet';
 import Chat from './pages/Chat';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
+ feature/skill-need-management-F5
+import SkillNeeds from './pages/SkillNeeds';
+
 import OtpConfirm from './pages/OtpConfirm';
+ main
 
 function App() {
   return (
@@ -36,6 +40,7 @@ function App() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/skills-needed" element={<SkillNeeds />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
