@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { skillService } from "SkillSwapAI/client/src/services/skillService";
+import { useEffect, useState } from "react";
+import { skillService } from "../../../services/skillService";
 
 interface SkillDetail {
   _id: string;
@@ -29,7 +29,7 @@ const SkillDetailModal = ({ skillId, onClose }: SkillDetailModalProps) => {
   useEffect(() => {
     if (!skillId) return;
 
-    skillService.getById(skillId).then((res) => {
+    skillService.getById(skillId).then((res: { data: { skill: SkillDetail } }) => {
       setSkill(res.data.skill);
     });
   }, [skillId]);

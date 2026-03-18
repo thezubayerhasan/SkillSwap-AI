@@ -1,15 +1,10 @@
-<<<<<<< HEAD
-import { useEffect, useState, useCallback } from 'react';
-import { skillService } from '../services/skillService';
-import { useAuth } from '../hooks/useAuth';
-import SkillForm from '../components/features/skills/SkillForm';
-import MySkills from '../components/features/skills/MySkills';
-=======
-import React, { useEffect, useState } from "react";
-import { skillService } from "SkillSwapAI/client/src/services/skillService";
-import SkillCard from "SkillSwapAI/client/src/components/features/skills/SkillCard";
-import SkillDetailModal from "SkillSwapAI/client/src/components/features/skills/SkillDetailModal";
->>>>>>> 895a522 (feat(F7): complete skill discovery with cards, search, filters, and detail modal)
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import SkillCard from "../components/features/skills/SkillCard";
+import SkillDetailModal from "../components/features/skills/SkillDetailModal";
+import SkillForm from "../components/features/skills/SkillForm";
+import MySkills from "../components/features/skills/MySkills";
+import { useAuth } from "../hooks/useAuth";
+import { skillService } from "../services/skillService";
 
 interface Skill {
   _id: string;
@@ -18,9 +13,8 @@ interface Skill {
   category?: string;
   level: string;
   tags: string[];
-<<<<<<< HEAD
   isActive: boolean;
-  user?: {
+  user: {
     _id: string;
     name: string;
     university?: string;
@@ -28,18 +22,27 @@ interface Skill {
   };
 }
 
+interface EditableSkill {
+  _id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  level: string;
+  tags: string[];
+}
+
 const SkillDiscovery = () => {
   const { user } = useAuth();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [editingSkill, setEditingSkill] = useState<EditableSkill | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-  const [level, setLevel] = useState('');
-
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [level, setLevel] = useState("");
 
   const fetchSkills = useCallback(async () => {
     setLoading(true);
@@ -52,7 +55,7 @@ const SkillDiscovery = () => {
       const res = await skillService.getAll(params);
       setSkills(res.data.skills ?? []);
     } catch {
-      console.error('Failed to load skills');
+      console.error("Failed to load skills");
     } finally {
       setLoading(false);
     }
@@ -62,7 +65,7 @@ const SkillDiscovery = () => {
     fetchSkills();
   }, [fetchSkills]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     fetchSkills();
   };
@@ -74,22 +77,22 @@ const SkillDiscovery = () => {
     fetchSkills();
   };
 
-  const handleEdit = (skill: Skill) => {
+  const handleEdit = (skill: EditableSkill) => {
     setEditingSkill(skill);
     setShowForm(true);
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '40px auto', padding: '0 16px' }}>
+    <div style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
       <h1>Skill Discovery</h1>
 
       {user && (
         <div style={{ marginBottom: 32 }}>
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               marginBottom: 16,
             }}
           >
@@ -99,9 +102,9 @@ const SkillDiscovery = () => {
                 setEditingSkill(null);
                 setShowForm(!showForm);
               }}
-              style={{ padding: '8px 16px', cursor: 'pointer' }}
+              style={{ padding: "8px 16px", cursor: "pointer" }}
             >
-              {showForm ? 'Cancel' : '+ Add Skill'}
+              {showForm ? "Cancel" : "+ Add Skill"}
             </button>
           </div>
 
@@ -110,13 +113,13 @@ const SkillDiscovery = () => {
         </div>
       )}
 
-      <hr style={{ margin: '32px 0' }} />
+      <hr style={{ margin: "32px 0" }} />
 
       <h2>Browse All Skills</h2>
 
       <form
         onSubmit={handleSearchSubmit}
-        style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}
+        style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}
       >
         <input
           value={search}
@@ -132,15 +135,15 @@ const SkillDiscovery = () => {
         >
           <option value="">All Categories</option>
           {[
-            'Programming',
-            'Design',
-            'Music',
-            'Language',
-            'Math',
-            'Writing',
-            'Video Editing',
-            'Tutoring',
-            'Other',
+            "Programming",
+            "Design",
+            "Music",
+            "Language",
+            "Math",
+            "Writing",
+            "Video Editing",
+            "Tutoring",
+            "Other",
           ].map((c) => (
             <option key={c} value={c}>
               {c}
@@ -159,7 +162,7 @@ const SkillDiscovery = () => {
           <option value="advanced">Advanced</option>
         </select>
 
-        <button type="submit" style={{ padding: '8px 16px', cursor: 'pointer' }}>
+        <button type="submit" style={{ padding: "8px 16px", cursor: "pointer" }}>
           Search
         </button>
       </form>
@@ -171,112 +174,18 @@ const SkillDiscovery = () => {
       ) : (
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
             gap: 16,
           }}
         >
           {skills.map((skill) => (
-            <div
-              key={skill._id}
-              style={{ padding: 16, border: '1px solid #ddd', borderRadius: 8 }}
-            >
-              <h3 style={{ margin: '0 0 4px' }}>{skill.title}</h3>
-
-              <p style={{ margin: '0 0 8px', fontSize: 14, color: '#888' }}>
-                by {skill.user?.name ?? 'Unknown'}
-                {skill.user?.university ? ` · ${skill.user.university}` : ''}
-              </p>
-
-              {skill.description && (
-                <p style={{ margin: '0 0 8px', color: '#666' }}>{skill.description}</p>
-              )}
-
-              <div style={{ display: 'flex', gap: 8, fontSize: 14 }}>
-                {skill.category && (
-                  <span
-                    style={{
-                      background: '#e0e7ff',
-                      padding: '2px 8px',
-                      borderRadius: 4,
-                    }}
-                  >
-                    {skill.category}
-                  </span>
-                )}
-
-                <span
-                  style={{
-                    background: '#d1fae5',
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                  }}
-                >
-                  {skill.level}
-                </span>
-              </div>
-
-              {skill.tags?.length > 0 && (
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 4,
-                    flexWrap: 'wrap',
-                    marginTop: 8,
-                  }}
-                >
-                  {skill.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        background: '#f3f4f6',
-                        padding: '2px 6px',
-                        borderRadius: 4,
-                        fontSize: 12,
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <SkillCard key={skill._id} skill={skill} onViewDetail={setSelectedSkillId} />
           ))}
         </div>
       )}
-=======
-  user: { _id: string; name: string };
-}
 
-const SkillDiscovery = () => {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
-
-  useEffect(() => {
-    skillService.getAll().then((res) => {
-      setSkills(res.data.skills);
-    });
-  }, []);
-
-  return (
-    <div style={{ padding: 40 }}>
-      <h1>Skill Discovery</h1>
-
-      <div style={{ display: "grid", gap: 16 }}>
-        {skills.map((skill) => (
-          <SkillCard
-            key={skill._id}
-            skill={skill}
-            onViewDetail={setSelectedSkillId}
-          />
-        ))}
-      </div>
-
-      <SkillDetailModal
-        skillId={selectedSkillId}
-        onClose={() => setSelectedSkillId(null)}
-      />
->>>>>>> 895a522 (feat(F7): complete skill discovery with cards, search, filters, and detail modal)
+      <SkillDetailModal skillId={selectedSkillId} onClose={() => setSelectedSkillId(null)} />
     </div>
   );
 };

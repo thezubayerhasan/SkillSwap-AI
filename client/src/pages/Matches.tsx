@@ -1,47 +1,30 @@
-<<<<<<< HEAD
-import { useEffect, useState } from 'react';
-import { matchService } from '../services/matchService';
-
-const Matches = () => {
-  const [matches, setMatches] = useState<unknown[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    matchService.getMatches()
-      .then(res => setMatches(res.data.matches ?? []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <div style={{ maxWidth: 900, margin: '40px auto', padding: '0 16px' }}>
-      <h1>My Matches</h1>
-      {loading ? <p>Loading matches...</p> : (
-        matches.length === 0
-          ? <p>No matches found yet.</p>
-          : <p>{matches.length} matches found.</p>
-      )}
-=======
-import React, { useEffect, useState } from "react";
-import { matchService } from "SkillSwapAI/client/src/services/matchService";
-import MatchCard from "SkillSwapAI/client/src/components/features/matching/MatchCard";
+import { useEffect, useState } from "react";
+import MatchCard from "../components/features/matching/MatchCard";
+import { matchService } from "../services/matchService";
 
 interface Match {
   user: {
     _id: string;
     name: string;
+    university?: string;
   };
   theyHaveWhatIWant: boolean;
   iHaveWhatTheyWant: boolean;
+  matchScore?: number;
+  matchedSkills?: string[];
+  matchedNeeds?: string[];
 }
 
 const Matches = () => {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    matchService.getMatches().then((res) => {
-      setMatches(res.data.matches);
-    });
+    matchService
+      .getMatches()
+      .then((res) => setMatches(res.data.matches ?? []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   const handleRequestExchange = (userId: string) => {
@@ -49,25 +32,26 @@ const Matches = () => {
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Matches</h1>
+    <div style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
+      <h1>My Matches</h1>
 
-      <div style={{ display: "grid", gap: 16 }}>
-        {matches.map((match) => (
-          <MatchCard
-            key={match.user._id}
-            match={match}
-            onRequestExchange={handleRequestExchange}
-          />
-        ))}
-      </div>
->>>>>>> 895a522 (feat(F7): complete skill discovery with cards, search, filters, and detail modal)
+      {loading ? (
+        <p>Loading matches...</p>
+      ) : matches.length === 0 ? (
+        <p>No matches found yet.</p>
+      ) : (
+        <div style={{ display: "grid", gap: 16 }}>
+          {matches.map((match) => (
+            <MatchCard
+              key={match.user._id}
+              match={match}
+              onRequestExchange={handleRequestExchange}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-<<<<<<< HEAD
 export default Matches;
-=======
-export default Matches;
->>>>>>> 895a522 (feat(F7): complete skill discovery with cards, search, filters, and detail modal)
