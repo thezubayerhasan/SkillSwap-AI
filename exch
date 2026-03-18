@@ -1,0 +1,18 @@
+const mongoose = require('mongoose');
+
+const exchangeRequestSchema = new mongoose.Schema({
+    requester: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // The user initiating the request
+    offeredItem: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true }, // The item the requester is offering
+    receiver: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // The user who owns the desired item
+    requestedItem: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true }, // The item the requester wants
+    status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected', 'cancelled'],
+        default: 'pending'
+    },
+    message: { type: String },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('ExchangeRequest', exchangeRequestSchema);
